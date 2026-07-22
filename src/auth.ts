@@ -4,7 +4,11 @@ import Credentials from "next-auth/providers/credentials";
 
 import { authConfig } from "@/auth.config";
 import { verifyOtpSchema } from "@/lib/validations";
-import { findUserByEmail, findOrCreateGoogleUser, toPublicUser } from "@/lib/db/users";
+import {
+  findUserByEmail,
+  findOrCreateGoogleUser,
+  toPublicUser,
+} from "@/lib/db/users";
 import { verifyOtp } from "@/lib/otp";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -49,13 +53,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async signIn({ user, account }) {
       if (account?.provider === "google") {
         if (!user.email) return false;
-        const dbUser = await findOrCreateGoogleUser({
-          email: user.email,
-          fullName: user.name ?? user.email.split("@")[0],
-          image: user.image ?? undefined,
-        });
-        user.id = dbUser._id.toString();
-        user.phone = dbUser.phone;
+        try {
+          const dbUser = await findOrCreateGoogleUser({
+            email: user.email,
+            fullName: user.name ?? user.email.split("@")[0],
+            image: user.image ?? undefined,
+          });
+          user.id = dbUser._id.toString();
+          user.phone = dbUser.phone;
+        } catch (error) {
+          // NextAuth maps a thrown/failed signIn callback to a generic
+          // "AccessDenied" page — log the real cause here (most commonly:
+          // MONGODB_URI unset or unreachable in this environment) so it's
+          // diagnosable from server logs instead of silently swallowed.
+          console.error(
+            "Google sign-in failed while syncing user to MongoDB:",
+            error,
+          );
+          return false;
+        }
       }
       return true;
     },
