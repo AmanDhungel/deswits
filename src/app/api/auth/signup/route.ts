@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 
-import { signUpSchema, toE164Nepal } from "@/lib/validations";
+import { signUpSchema } from "@/lib/validations";
 import { createEmailUser, findUserByEmail, findUserByPhone } from "@/lib/db/users";
 import { issueOtp } from "@/lib/otp";
 
@@ -9,11 +9,10 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const data = signUpSchema.parse(body);
-    const e164Phone = toE164Nepal(data.phone);
 
     const [existingEmail, existingPhone] = await Promise.all([
       findUserByEmail(data.email),
-      findUserByPhone(e164Phone),
+      findUserByPhone(data.phone),
     ]);
 
     if (existingEmail) {
@@ -33,7 +32,7 @@ export async function POST(request: Request) {
     const user = await createEmailUser({
       fullName: data.fullName,
       email: data.email,
-      phone: e164Phone,
+      phone: data.phone,
     });
 
     try {
