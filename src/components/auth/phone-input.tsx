@@ -1,10 +1,12 @@
 import * as React from "react";
+import { Phone } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 /**
- * Nepali-only phone field: fixed +977 prefix, numeric 10-digit input.
+ * International phone field — accepts any country, as long as the number
+ * includes its dialing code (e.g. +1 415 555 2671, +977 98 1234 5678).
  * Spreads react-hook-form's register() output straight onto the inner
  * native input so ref/onChange/onBlur wiring works as normal.
  */
@@ -20,18 +22,14 @@ export function PhoneInput({
         wrapperClassName
       )}
     >
-      <span className="flex select-none items-center gap-1.5 border-r border-input bg-muted/40 px-3 text-sm font-medium text-muted-foreground">
-        <span className="rounded-sm bg-emerald/15 px-1 py-0.5 text-[10px] font-bold tracking-wide text-emerald">
-          NP
-        </span>
-        +977
+      <span className="flex select-none items-center border-r border-input bg-muted/40 px-3 text-muted-foreground">
+        <Phone className="size-4" />
       </span>
       <Input
         type="tel"
-        inputMode="numeric"
-        autoComplete="tel-national"
-        placeholder="98XXXXXXXX"
-        maxLength={10}
+        inputMode="tel"
+        autoComplete="tel"
+        placeholder="+1 415 555 2671"
         className={cn(
           "h-full rounded-none border-0 bg-transparent focus-visible:border-transparent focus-visible:ring-0",
           className

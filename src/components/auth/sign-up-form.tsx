@@ -97,7 +97,7 @@ export function SignUpForm() {
             <p className="text-xs text-destructive">{errors.phone.message}</p>
           ) : (
             <p className="text-xs text-muted-foreground">
-              We currently support Nepali mobile numbers only.
+              Any country — just include the dialing code (e.g. +1, +44, +977).
             </p>
           )}
         </div>
