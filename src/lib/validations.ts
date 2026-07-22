@@ -32,6 +32,8 @@ export const phoneSchema = z
     message: "Enter a valid Nepali mobile number (starts with 97 or 98, 10 digits)",
   });
 
+const emailSchema = z.string().trim().toLowerCase().email("Enter a valid email address");
+
 export const signUpSchema = z.object({
   fullName: z
     .string()
@@ -39,22 +41,26 @@ export const signUpSchema = z.object({
     .min(2, "Full name must be at least 2 characters")
     .max(80, "Full name is too long")
     .regex(/^[a-zA-Z\s.'-]+$/, "Full name can only contain letters and spaces"),
-  email: z.string().trim().toLowerCase().email("Enter a valid email address"),
+  email: emailSchema,
   phone: phoneSchema,
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .max(72, "Password is too long")
-    .regex(/[a-z]/, "Password needs a lowercase letter")
-    .regex(/[A-Z]/, "Password needs an uppercase letter")
-    .regex(/[0-9]/, "Password needs a number"),
 });
 
 export type SignUpInput = z.infer<typeof signUpSchema>;
 
-export const signInSchema = z.object({
-  email: z.string().trim().toLowerCase().email("Enter a valid email address"),
-  password: z.string().min(1, "Password is required"),
+export const OTP_LENGTH = 6;
+
+export const requestOtpSchema = z.object({
+  email: emailSchema,
 });
 
-export type SignInInput = z.infer<typeof signInSchema>;
+export type RequestOtpInput = z.infer<typeof requestOtpSchema>;
+
+export const verifyOtpSchema = z.object({
+  email: emailSchema,
+  otp: z
+    .string()
+    .trim()
+    .regex(new RegExp(`^\\d{${OTP_LENGTH}}$`), `Enter the ${OTP_LENGTH}-digit code`),
+});
+
+export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>;

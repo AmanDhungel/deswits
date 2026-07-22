@@ -1,13 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signIn } from "next-auth/react";
 import { toast } from "sonner";
-import { z } from "zod";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,54 +12,31 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { GoogleButton } from "@/components/auth/google-button";
 import { PhoneInput } from "@/components/auth/phone-input";
-import { signUpSchema } from "@/lib/validations";
+import { signUpSchema, type SignUpInput } from "@/lib/validations";
 import { useSignup } from "@/hooks/use-signup";
-
-const formSchema = signUpSchema
-  .extend({ confirmPassword: z.string().min(1, "Please confirm your password") })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
-
-type FormValues = z.infer<typeof formSchema>;
 
 export function SignUpForm() {
   const router = useRouter();
   const signup = useSignup();
-  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  } = useForm<SignUpInput>({
+    resolver: zodResolver(signUpSchema),
   });
 
-  async function onSubmit(values: FormValues) {
+  async function onSubmit(values: SignUpInput) {
     try {
       await signup.mutateAsync({
         fullName: values.fullName,
         email: values.email,
         phone: values.phone,
-        password: values.password,
       });
 
-      const result = await signIn("credentials", {
-        email: values.email,
-        password: values.password,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        toast.success("Account created — please sign in.");
-        router.push("/sign-in");
-        return;
-      }
-
-      toast.success("Welcome to Deswits!");
-      router.push("/dashboard");
+      toast.success("Account created — we've emailed you a sign-in code.");
+      router.push(`/sign-in?email=${encodeURIComponent(values.email)}&sent=1`);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Something went wrong.");
     }
@@ -105,7 +79,11 @@ export function SignUpForm() {
           />
           {errors.email ? (
             <p className="text-xs text-destructive">{errors.email.message}</p>
-          ) : null}
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              We&apos;ll email you a code here to sign in — no password to remember.
+            </p>
+          )}
         </div>
 
         <div className="flex flex-col gap-1.5">
@@ -122,49 +100,6 @@ export function SignUpForm() {
               We currently support Nepali mobile numbers only.
             </p>
           )}
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="password">Password</Label>
-          <div className="relative">
-            <Input
-              id="password"
-              type={showPassword ? "text" : "password"}
-              placeholder="Create a strong password"
-              aria-invalid={!!errors.password}
-              className="pr-10"
-              {...register("password")}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword((v) => !v)}
-              className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
-              tabIndex={-1}
-            >
-              {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-            </button>
-          </div>
-          {errors.password ? (
-            <p className="text-xs text-destructive">{errors.password.message}</p>
-          ) : (
-            <p className="text-xs text-muted-foreground">
-              At least 8 characters, with upper, lower & a number.
-            </p>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="confirmPassword">Confirm password</Label>
-          <Input
-            id="confirmPassword"
-            type={showPassword ? "text" : "password"}
-            placeholder="Re-enter your password"
-            aria-invalid={!!errors.confirmPassword}
-            {...register("confirmPassword")}
-          />
-          {errors.confirmPassword ? (
-            <p className="text-xs text-destructive">{errors.confirmPassword.message}</p>
-          ) : null}
         </div>
 
         <Button

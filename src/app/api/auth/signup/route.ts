@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
 import { ZodError } from "zod";
 
 import { signUpSchema, toE164Nepal } from "@/lib/validations";
-import { createCredentialsUser, findUserByEmail, findUserByPhone } from "@/lib/db/users";
+import { createEmailUser, findUserByEmail, findUserByPhone } from "@/lib/db/users";
+import { issueOtp } from "@/lib/otp";
 
 export async function POST(request: Request) {
   try {
@@ -30,14 +30,20 @@ export async function POST(request: Request) {
       );
     }
 
-    const passwordHash = await bcrypt.hash(data.password, 12);
-
-    const user = await createCredentialsUser({
+    const user = await createEmailUser({
       fullName: data.fullName,
       email: data.email,
       phone: e164Phone,
-      passwordHash,
     });
+
+    try {
+      await issueOtp(data.email, data.fullName);
+    } catch (error) {
+      // Account already exists at this point — a transient email failure
+      // shouldn't fail the signup. The user can request a new code from
+      // the sign-in page.
+      console.error("Failed to send signup OTP email:", error);
+    }
 
     return NextResponse.json(
       { id: user._id.toString(), email: user.email },

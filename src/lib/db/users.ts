@@ -7,13 +7,12 @@ export interface UserDocument {
   email: string;
   phone?: string;
   image?: string;
-  passwordHash?: string;
-  provider: "credentials" | "google";
+  provider: "email" | "google";
   createdAt: Date;
   updatedAt: Date;
 }
 
-export type PublicUser = Omit<UserDocument, "passwordHash" | "_id"> & { id: string };
+export type PublicUser = Omit<UserDocument, "_id"> & { id: string };
 
 export function toPublicUser(user: UserDocument): PublicUser {
   const { _id, fullName, email, phone, image, provider, createdAt, updatedAt } = user;
@@ -23,6 +22,18 @@ export function toPublicUser(user: UserDocument): PublicUser {
 async function usersCollection() {
   const db = await getDb();
   return db.collection<UserDocument>("users");
+}
+
+let indexesEnsured: Promise<void> | null = null;
+
+async function ensureIndexesOnce() {
+  if (!indexesEnsured) {
+    indexesEnsured = ensureUserIndexes().catch((err) => {
+      indexesEnsured = null;
+      throw err;
+    });
+  }
+  return indexesEnsured;
 }
 
 export async function findUserByEmail(email: string) {
@@ -41,20 +52,19 @@ export async function findUserById(id: string) {
   return users.findOne({ _id: new ObjectId(id) });
 }
 
-export async function createCredentialsUser(input: {
+export async function createEmailUser(input: {
   fullName: string;
   email: string;
   phone: string;
-  passwordHash: string;
 }) {
+  await ensureIndexesOnce();
   const users = await usersCollection();
   const now = new Date();
   const doc: Omit<UserDocument, "_id"> = {
     fullName: input.fullName,
     email: input.email.toLowerCase(),
     phone: input.phone,
-    passwordHash: input.passwordHash,
-    provider: "credentials",
+    provider: "email",
     createdAt: now,
     updatedAt: now,
   };
@@ -67,6 +77,7 @@ export async function findOrCreateGoogleUser(input: {
   fullName: string;
   image?: string;
 }) {
+  await ensureIndexesOnce();
   const users = await usersCollection();
   const existing = await users.findOne({ email: input.email.toLowerCase() });
   if (existing) return existing;

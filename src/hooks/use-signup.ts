@@ -6,7 +6,6 @@ export interface SignupPayload {
   fullName: string;
   email: string;
   phone: string;
-  password: string;
 }
 
 interface SignupResponse {

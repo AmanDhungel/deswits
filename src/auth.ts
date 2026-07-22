@@ -1,11 +1,11 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import Credentials from "next-auth/providers/credentials";
-import bcrypt from "bcryptjs";
 
 import { authConfig } from "@/auth.config";
-import { signInSchema } from "@/lib/validations";
+import { verifyOtpSchema } from "@/lib/validations";
 import { findUserByEmail, findOrCreateGoogleUser, toPublicUser } from "@/lib/db/users";
+import { verifyOtp } from "@/lib/otp";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -16,21 +16,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
     Credentials({
-      name: "credentials",
+      id: "otp",
+      name: "Email code",
       credentials: {
         email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
+        otp: { label: "Code", type: "text" },
       },
       async authorize(credentials) {
-        const parsed = signInSchema.safeParse(credentials);
+        const parsed = verifyOtpSchema.safeParse(credentials);
         if (!parsed.success) return null;
-        const { email, password } = parsed.data;
+        const { email, otp } = parsed.data;
+
+        const result = await verifyOtp(email, otp);
+        if (!result.ok) return null;
 
         const user = await findUserByEmail(email);
-        if (!user || !user.passwordHash) return null;
-
-        const isValid = await bcrypt.compare(password, user.passwordHash);
-        if (!isValid) return null;
+        if (!user) return null;
 
         const publicUser = toPublicUser(user);
         return {

@@ -10,16 +10,26 @@ declare global {
   var _mongoClientPromise: Promise<MongoClient> | undefined;
 }
 
+function connect(): Promise<MongoClient> {
+  return new MongoClient(uri!).connect();
+}
+
 let clientPromise: Promise<MongoClient>;
 
 if (process.env.NODE_ENV === "development") {
-  // Reuse the client across HMR reloads in dev so we don't exhaust connections.
+  // Reuse the client across HMR reloads in dev so we don't exhaust
+  // connections. If the initial connection attempt fails (e.g. the local
+  // Mongo instance wasn't up yet), clear the cache so the next request
+  // retries instead of replaying the same rejected promise forever.
   if (!global._mongoClientPromise) {
-    global._mongoClientPromise = new MongoClient(uri).connect();
+    global._mongoClientPromise = connect().catch((err) => {
+      global._mongoClientPromise = undefined;
+      throw err;
+    });
   }
   clientPromise = global._mongoClientPromise;
 } else {
-  clientPromise = new MongoClient(uri).connect();
+  clientPromise = connect();
 }
 
 export default clientPromise;

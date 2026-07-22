@@ -8,7 +8,7 @@ export interface CurrentUser {
   email: string;
   phone: string | null;
   image: string | null;
-  provider: "credentials" | "google";
+  provider: "email" | "google";
   createdAt: string;
 }
 

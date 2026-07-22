@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -87,14 +88,16 @@ export function DashboardTopbar() {
           </Avatar>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-60">
-          <DropdownMenuLabel className="flex flex-col gap-0.5">
-            <span className="truncate text-sm font-medium text-foreground">
-              {user?.fullName ?? "Loading…"}
-            </span>
-            <span className="truncate text-xs font-normal text-muted-foreground">
-              {user?.email}
-            </span>
-          </DropdownMenuLabel>
+          <DropdownMenuGroup>
+            <DropdownMenuLabel className="flex flex-col gap-0.5">
+              <span className="truncate text-sm font-medium text-foreground">
+                {user?.fullName ?? "Loading…"}
+              </span>
+              <span className="truncate text-xs font-normal text-muted-foreground">
+                {user?.email}
+              </span>
+            </DropdownMenuLabel>
+          </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem disabled>
             <User className="size-4" />
