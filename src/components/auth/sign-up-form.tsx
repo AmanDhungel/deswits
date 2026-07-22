@@ -38,7 +38,9 @@ export function SignUpForm() {
       toast.success("Account created — we've emailed you a sign-in code.");
       router.push(`/sign-in?email=${encodeURIComponent(values.email)}&sent=1`);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Something went wrong.");
+      toast.error(
+        error instanceof Error ? error.message : "Something went wrong.",
+      );
     }
   }
 
@@ -54,7 +56,10 @@ export function SignUpForm() {
         <Separator className="flex-1" />
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4" noValidate>
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="flex flex-col gap-4"
+        noValidate>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="fullName">Full name</Label>
           <Input
@@ -64,7 +69,9 @@ export function SignUpForm() {
             {...register("fullName")}
           />
           {errors.fullName ? (
-            <p className="text-xs text-destructive">{errors.fullName.message}</p>
+            <p className="text-xs text-destructive">
+              {errors.fullName.message}
+            </p>
           ) : null}
         </div>
 
@@ -81,7 +88,8 @@ export function SignUpForm() {
             <p className="text-xs text-destructive">{errors.email.message}</p>
           ) : (
             <p className="text-xs text-muted-foreground">
-              We&apos;ll email you a code here to sign in — no password to remember.
+              We&apos;ll email you a code here to sign in — no password to
+              remember.
             </p>
           )}
         </div>
@@ -105,8 +113,7 @@ export function SignUpForm() {
         <Button
           type="submit"
           className="glow-gold mt-2 h-11"
-          disabled={isSubmitting || signup.isPending}
-        >
+          disabled={isSubmitting || signup.isPending}>
           {isSubmitting || signup.isPending ? (
             <Loader2 className="size-4 animate-spin" />
           ) : null}
