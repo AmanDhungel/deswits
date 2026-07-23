@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     if (!user) {
       return NextResponse.json(
         { error: "No account found with that email. Please sign up first." },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -28,14 +28,14 @@ export async function POST(request: Request) {
     if (error instanceof ZodError) {
       return NextResponse.json(
         { error: error.issues[0]?.message ?? "Invalid input." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     console.error("OTP request error:", error);
     return NextResponse.json(
       { error: "Something went wrong. Please try again." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -10,7 +10,9 @@ interface RequestOtpResponse {
   message: string;
 }
 
-async function requestOtp(payload: RequestOtpPayload): Promise<RequestOtpResponse> {
+async function requestOtp(
+  payload: RequestOtpPayload,
+): Promise<RequestOtpResponse> {
   const res = await fetch("/api/auth/otp/request", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
