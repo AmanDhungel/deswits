@@ -12,7 +12,7 @@ export const COMPANY = {
   },
   phone: "+1 (408) 982-6229",
   phoneHref: "tel:+14089826229",
-  email: "hello@deswits.com",
+  email: "blockchain@deswits.com",
 } as const;
 
 export const NAV_LINKS = [

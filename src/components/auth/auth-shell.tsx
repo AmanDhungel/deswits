@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { ShieldCheck, Sparkles, TrendingUp } from "lucide-react";
+import { Blocks, Fingerprint, ShieldCheck, Wallet } from "lucide-react";
 
 import { Logo } from "@/components/site/logo";
 import { NetworkBackground } from "@/components/site/network-background";
@@ -9,9 +9,10 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 const HIGHLIGHTS = [
-  { icon: ShieldCheck, text: "Blockchain-verified investment records" },
-  { icon: Sparkles, text: "Laser-precision startup diligence" },
-  { icon: TrendingUp, text: "Real-time portfolio growth tracking" },
+  { icon: Blocks, text: "Yemchain blockchain" },
+  { icon: Fingerprint, text: "Decentralized identity management" },
+  { icon: ShieldCheck, text: "Zero knowledge proof cybersecurity" },
+  { icon: Wallet, text: "Self custody services" },
 ];
 
 export function AuthShell({
