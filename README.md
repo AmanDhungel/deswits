@@ -9,11 +9,11 @@ mark.
 
 - **Framework:** Next.js 16 (App Router, Turbopack)
 - **Auth:** NextAuth v5 — Google OAuth + email one-time-code (no passwords), JWT sessions
-- **Email:** [Resend](https://resend.com) (OTP codes, branded HTML template)
+- **Email:** [Mailtrap](https://mailtrap.io) (OTP codes, branded HTML template)
 - **Database:** MongoDB (native driver)
 - **Data fetching:** TanStack React Query
 - **UI:** shadcn/ui + Tailwind CSS v4
-- **Forms/validation:** react-hook-form + Zod (Nepali-phone-only signup validation)
+- **Forms/validation:** react-hook-form + Zod (international phone validation via libphonenumber-js)
 
 ## Getting started
 
@@ -32,14 +32,14 @@ Open [http://localhost:3000](http://localhost:3000).
 | `MONGODB_URI` | MongoDB connection string, including a database name (e.g. `.../deswits?...`). |
 | `AUTH_SECRET` | Session encryption secret. Generate with `npx auth secret` or `openssl rand -base64 32`. |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | From [Google Cloud Console](https://console.cloud.google.com/apis/credentials). Add authorized redirect URI `http://localhost:3000/api/auth/callback/google` (and your production URL). |
-| `RESEND_API_KEY` / `EMAIL_FROM` | Sends sign-in codes — a [Resend](https://resend.com/api-keys) API key. Free tier can send from `onboarding@resend.dev` with zero domain setup, but only *to* the email on your Resend account until you verify a sending domain. Without this set, OTP codes are printed to the dev server console instead (see [src/lib/email.ts](src/lib/email.ts)). |
+| `MAILTRAP_API_TOKEN` / `EMAIL_FROM` | Sends sign-in codes — a [Mailtrap](https://mailtrap.io/api-tokens) Sending API token. Sending from a custom `EMAIL_FROM` domain requires verifying that domain in Mailtrap under Sending Domains first. Without this set, OTP codes are printed to the dev server console instead (see [src/lib/email.ts](src/lib/email.ts)). |
 | `NEXTAUTH_URL` | Only needed in production behind a proxy/custom domain. |
 
 A `.env.local` with a placeholder `MONGODB_URI` and a generated `AUTH_SECRET`
 is already included so `npm run build` / `npm run dev` work out of the box.
-**Replace `MONGODB_URI`, the Google credentials, and `RESEND_API_KEY`** with
-real values before using auth for real. Without `RESEND_API_KEY`, OTP codes
-are printed to the dev server console instead of emailed (see
+**Replace `MONGODB_URI`, the Google credentials, and `MAILTRAP_API_TOKEN`**
+with real values before using auth for real. Without `MAILTRAP_API_TOKEN`,
+OTP codes are printed to the dev server console instead of emailed (see
 [src/lib/email.ts](src/lib/email.ts)) — handy for local testing.
 
 ## Auth flows
@@ -50,8 +50,9 @@ There are no passwords anywhere in this app.
   sign-in creates the user record automatically (see `findOrCreateGoogleUser`
   in [src/lib/db/users.ts](src/lib/db/users.ts)).
 - **Email one-time code** — `/sign-up` collects full name, email, and a
-  **Nepali mobile number only** (validated against `^(97|98)\d{8}$`, stored
-  as `+977XXXXXXXXXX`) — no password. On success the server immediately
+  phone number from **any country** (validated and normalized to E.164 via
+  libphonenumber-js — see `phoneSchema` in [src/lib/validations.ts](src/lib/validations.ts))
+  — no password. On success the server immediately
   emails a 6-digit code and the browser lands on `/sign-in` with that code
   step ready to go. To sign in later, enter your email on `/sign-in`, we
   email a fresh 6-digit code (5-minute expiry, 5 attempts, 45s resend
@@ -80,7 +81,7 @@ src/
   components/
     ui/                       shadcn/ui primitives
     site/                     landing page building blocks (navbar, hero, cards…)
-    auth/                     sign-in/up forms, Google button, Nepali phone input, OTP input
+    auth/                     sign-in/up forms, Google button, international phone input, OTP input
     dashboard/                sidebar, topbar, stat cards, holdings table
     providers/                React Query + NextAuth session providers
   lib/                        mongodb client, validations, constants, db queries, otp, email

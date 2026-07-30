@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ArrowRight, PlayCircle, ShieldCheck } from "lucide-react";
+import { ArrowRight, Play, ShieldCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { NetworkBackground } from "@/components/site/network-background";
 import { StatCard } from "@/components/site/stat-card";
+import { cn } from "@/lib/utils";
 
 const STATS = [
   { value: "$42M+", label: "Deal flow secured" },
@@ -16,31 +17,53 @@ const STATS = [
 ];
 
 export function HeroSection() {
-  const [videoFailed, setVideoFailed] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
 
   return (
     <section id="home" className="relative isolate overflow-hidden bg-ink">
       <div className="absolute inset-0">
-        {!videoFailed ? (
-          <video
-            className="h-full w-full object-cover opacity-40"
-            autoPlay
-            muted
-            loop
-            playsInline
-            poster="/hero-poster.svg"
-            onError={() => setVideoFailed(true)}
-          >
-            <source src="/videos/hero-bg.mp4" type="video/mp4" />
-          </video>
-        ) : null}
-        <NetworkBackground className="opacity-70" />
+        <NetworkBackground className="opacity-40" />
         <div className="absolute inset-0 bg-gradient-to-b from-ink/40 via-ink/70 to-background" />
         <div className="bg-grid absolute inset-0 opacity-40" />
       </div>
 
-      <div className="relative mx-auto flex max-w-7xl flex-col items-center px-4 pt-28 pb-20 text-center sm:px-6 sm:pt-36 sm:pb-28 lg:px-8">
-        <span className="inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.2em] text-gold">
+      <div className="relative mx-auto flex max-w-7xl flex-col items-center px-4 pt-16 pb-20 text-center sm:px-6 sm:pt-20 sm:pb-28 lg:px-8">
+        {/* Video placeholder — the placeholder graphic stays underneath and
+            visible by default (load-failure events are unreliable here: they
+            fire on <source>, not <video>, and don't bubble). Drop a file at
+            public/videos/hero-bg.mp4 and it fades in on top automatically
+            once it actually has playable data. */}
+        <div className="relative aspect-video w-full max-w-4xl overflow-hidden rounded-2xl border border-gold/25 bg-ink glow-gold">
+          <NetworkBackground density={90} />
+          <div className="bg-radial-fade pointer-events-none absolute inset-0" />
+          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-3">
+            <span className="flex size-16 items-center justify-center rounded-full border border-gold/40 bg-gold/10 text-gold backdrop-blur-sm">
+              <Play className="size-6 fill-current" />
+            </span>
+            <p className="text-sm font-medium text-foreground">
+              Watch how Deswits works
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Product walkthrough coming soon
+            </p>
+          </div>
+
+          <video
+            className={cn(
+              "absolute inset-0 h-full w-full object-cover transition-opacity duration-700",
+              videoReady ? "opacity-100" : "opacity-0"
+            )}
+            autoPlay
+            muted
+            loop
+            playsInline
+            onLoadedData={() => setVideoReady(true)}
+          >
+            <source src="/videos/hero-bg.mp4" type="video/mp4" />
+          </video>
+        </div>
+
+        <span className="mt-10 inline-flex items-center gap-2 rounded-full border border-gold/30 bg-gold/10 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.2em] text-gold">
           <ShieldCheck className="size-3.5" />
           Blockchain-secured startup investing
         </span>
@@ -63,8 +86,7 @@ export function HeroSection() {
             size="lg"
             className="glow-gold h-12 px-8 text-base"
             nativeButton={false}
-            render={<Link href="/sign-up" />}
-          >
+            render={<Link href="/sign-up" />}>
             Start investing
             <ArrowRight className="size-4" />
           </Button>
@@ -73,9 +95,8 @@ export function HeroSection() {
             variant="outline"
             className="h-12 border-emerald/30 px-8 text-base hover:bg-emerald/10"
             nativeButton={false}
-            render={<Link href="#how-it-works" />}
-          >
-            <PlayCircle className="size-4" />
+            render={<Link href="#how-it-works" />}>
+            <Play className="size-4" />
             See how it works
           </Button>
         </div>

@@ -17,8 +17,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { NAV_LINKS } from "@/lib/constants";
+import Image from "next/image";
 
 export function Navbar() {
   const { data: session, status } = useSession();
@@ -34,15 +40,15 @@ export function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/80 backdrop-blur-lg">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Logo />
+        {/* <Logo /> */}
+        <Image src="/logo.png" alt="Deswits Logo" width={40} height={40} />
 
         <nav className="hidden items-center gap-8 md:flex">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
               {link.label}
             </Link>
           ))}
@@ -53,7 +59,10 @@ export function Navbar() {
             <DropdownMenu>
               <DropdownMenuTrigger>
                 <Avatar className="size-9 border border-gold/30">
-                  <AvatarImage src={session.user?.image ?? undefined} alt={session.user?.name ?? "User"} />
+                  <AvatarImage
+                    src={session.user?.image ?? undefined}
+                    alt={session.user?.name ?? "User"}
+                  />
                   <AvatarFallback className="bg-secondary text-secondary-foreground text-xs">
                     {initials || "DS"}
                   </AvatarFallback>
@@ -72,8 +81,7 @@ export function Navbar() {
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   variant="destructive"
-                  onClick={() => signOut({ callbackUrl: "/" })}
-                >
+                  onClick={() => signOut({ callbackUrl: "/" })}>
                   <LogOut className="size-4" />
                   Sign out
                 </DropdownMenuItem>
@@ -81,10 +89,16 @@ export function Navbar() {
             </DropdownMenu>
           ) : (
             <>
-              <Button variant="ghost" nativeButton={false} render={<Link href="/sign-in" />}>
+              <Button
+                variant="ghost"
+                nativeButton={false}
+                render={<Link href="/sign-in" />}>
                 Sign in
               </Button>
-              <Button className="glow-gold" nativeButton={false} render={<Link href="/sign-up" />}>
+              <Button
+                className="glow-gold"
+                nativeButton={false}
+                render={<Link href="/sign-up" />}>
                 Get started
               </Button>
             </>
@@ -92,7 +106,10 @@ export function Navbar() {
         </div>
 
         <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger render={<Button variant="ghost" size="icon" className="md:hidden" />}>
+          <SheetTrigger
+            render={
+              <Button variant="ghost" size="icon" className="md:hidden" />
+            }>
             <Menu className="size-5" />
           </SheetTrigger>
           <SheetContent side="right" className="bg-background border-border">
@@ -105,8 +122,7 @@ export function Navbar() {
                     key={link.href}
                     href={link.href}
                     onClick={() => setOpen(false)}
-                    className="text-base font-medium text-foreground/90 hover:text-gold"
-                  >
+                    className="text-base font-medium text-foreground/90 hover:text-gold">
                     {link.label}
                   </Link>
                 ))}
@@ -114,17 +130,30 @@ export function Navbar() {
               <div className="flex flex-col gap-3 pt-4">
                 {status === "authenticated" ? (
                   <>
-                    <Button nativeButton={false} render={<Link href="/dashboard" />}>Dashboard</Button>
-                    <Button variant="outline" onClick={() => signOut({ callbackUrl: "/" })}>
+                    <Button
+                      nativeButton={false}
+                      render={<Link href="/dashboard" />}>
+                      Dashboard
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => signOut({ callbackUrl: "/" })}>
                       Sign out
                     </Button>
                   </>
                 ) : (
                   <>
-                    <Button variant="outline" nativeButton={false} render={<Link href="/sign-in" />}>
+                    <Button
+                      variant="outline"
+                      nativeButton={false}
+                      render={<Link href="/sign-in" />}>
                       Sign in
                     </Button>
-                    <Button nativeButton={false} render={<Link href="/sign-up" />}>Get started</Button>
+                    <Button
+                      nativeButton={false}
+                      render={<Link href="/sign-up" />}>
+                      Get started
+                    </Button>
                   </>
                 )}
               </div>

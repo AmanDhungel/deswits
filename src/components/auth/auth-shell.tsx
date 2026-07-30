@@ -1,9 +1,12 @@
+"use client";
 import Link from "next/link";
 import { ShieldCheck, Sparkles, TrendingUp } from "lucide-react";
 
 import { Logo } from "@/components/site/logo";
 import { NetworkBackground } from "@/components/site/network-background";
 import { COMPANY } from "@/lib/constants";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 const HIGHLIGHTS = [
   { icon: ShieldCheck, text: "Blockchain-verified investment records" },
@@ -22,13 +25,22 @@ export function AuthShell({
   children: React.ReactNode;
   footer: React.ReactNode;
 }) {
+  const router = useRouter();
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       <div className="relative hidden flex-col justify-between overflow-hidden bg-ink p-10 lg:flex">
         <NetworkBackground density={80} className="opacity-60" />
         <div className="bg-radial-fade pointer-events-none absolute inset-0" />
         <div className="relative">
-          <Logo />
+          <Image
+            src="/logo.png"
+            alt="Deswits Logo"
+            width={40}
+            height={40}
+            onClick={() => {
+              router.push("/");
+            }}
+          />
         </div>
 
         <div className="relative flex flex-col gap-8">
@@ -39,7 +51,9 @@ export function AuthShell({
           </blockquote>
           <ul className="flex flex-col gap-4">
             {HIGHLIGHTS.map((item) => (
-              <li key={item.text} className="flex items-center gap-3 text-sm text-muted-foreground">
+              <li
+                key={item.text}
+                className="flex items-center gap-3 text-sm text-muted-foreground">
                 <span className="flex size-8 items-center justify-center rounded-full border border-emerald/30 bg-emerald/10 text-emerald">
                   <item.icon className="size-4" />
                 </span>

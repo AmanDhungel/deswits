@@ -1,14 +1,23 @@
-import { Resend } from "resend";
+import { MailtrapClient } from "mailtrap";
 
 import { COMPANY } from "@/lib/constants";
 
-let resendClient: Resend | null | undefined;
+let mailtrapClient: MailtrapClient | null | undefined;
 
-function getResend(): Resend | null {
-  if (resendClient !== undefined) return resendClient;
-  const key = process.env.RESEND_API_KEY;
-  resendClient = key ? new Resend(key) : null;
-  return resendClient;
+function getMailtrap(): MailtrapClient | null {
+  if (mailtrapClient !== undefined) return mailtrapClient;
+  const token = process.env.MAILTRAP_API_TOKEN;
+  mailtrapClient = token ? new MailtrapClient({ token }) : null;
+  return mailtrapClient;
+}
+
+function parseFromAddress(raw: string): { email: string; name?: string } {
+  const match = raw.match(/^(.*)<(.+)>$/);
+  if (match) {
+    const name = match[1].trim().replace(/^"|"$/g, "");
+    return { email: match[2].trim(), name: name || undefined };
+  }
+  return { email: raw.trim() };
 }
 
 function otpEmailTemplate(code: string, fullName?: string) {
@@ -49,9 +58,11 @@ function otpEmailTemplate(code: string, fullName?: string) {
               <tr>
                 ${digits
                   .map(
-                    (d) => `<td style="width:44px;height:56px;background:#101c17;border:1px solid rgba(23,201,131,0.35);border-radius:10px;text-align:center;vertical-align:middle;">
+                    (
+                      d,
+                    ) => `<td style="width:44px;height:56px;background:#101c17;border:1px solid rgba(23,201,131,0.35);border-radius:10px;text-align:center;vertical-align:middle;">
                   <span style="font-size:26px;font-weight:700;color:#17c983;font-family:'Courier New',monospace;">${d}</span>
-                </td>`
+                </td>`,
                   )
                   .join("")}
               </tr>
@@ -91,32 +102,39 @@ export async function sendOtpEmail({
   code: string;
   fullName?: string;
 }) {
-  const resend = getResend();
+  const client = getMailtrap();
 
-  if (!resend) {
+  if (!client) {
     if (process.env.NODE_ENV === "production") {
-      throw new Error("Email is not configured. Set RESEND_API_KEY to send OTP emails.");
+      throw new Error(
+        "Email is not configured. Set MAILTRAP_API_TOKEN to send OTP emails.",
+      );
     }
-    // Local dev without Resend configured — surface the code in the server
+    // Local dev without Mailtrap configured — surface the code in the server
     // log instead of failing, so the sign-in flow stays testable end to end.
     console.warn(`\n[dev email] OTP for ${to}: ${code}\n`);
     return;
   }
 
   const { html, text } = otpEmailTemplate(code, fullName);
-  const from = process.env.EMAIL_FROM || "Deswits <onboarding@resend.dev>";
+  const from = parseFromAddress(
+    process.env.EMAIL_FROM || "Deswits <no-reply@deswits.com>",
+  );
 
-  const { error } = await resend.emails.send({
-    from,
-    to,
-    subject: "Your Deswits sign-in code",
-    html,
-    text,
-  });
-
-  if (error) {
+  try {
+    await client.send({
+      from,
+      to: [{ email: to }],
+      subject: "Your Deswits sign-in code",
+      html,
+      text,
+      category: "OTP",
+    });
+  } catch (error) {
     throw new Error(
-      typeof error === "string" ? error : error.message || "Failed to send email via Resend."
+      error instanceof Error
+        ? error.message
+        : "Failed to send email via Mailtrap.",
     );
   }
 }
