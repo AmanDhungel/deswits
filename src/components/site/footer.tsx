@@ -26,8 +26,7 @@ export function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm text-muted-foreground transition-colors hover:text-gold"
-                  >
+                    className="text-sm text-muted-foreground transition-colors hover:text-gold">
                     {link.label}
                   </Link>
                 </li>
@@ -43,8 +42,6 @@ export function Footer() {
               <li className="flex items-start gap-3 text-sm text-muted-foreground">
                 <MapPin className="mt-0.5 size-4 shrink-0 text-emerald" />
                 <span>
-                  {COMPANY.address.line1}
-                  <br />
                   {COMPANY.address.city}, {COMPANY.address.state}
                   <br />
                   {COMPANY.address.country}

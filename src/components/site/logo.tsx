@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 /**
  * Icon-only mark: gold ascending arrow (growth) threaded through an emerald
@@ -12,16 +13,29 @@ export function LogoMark({ className }: { className?: string }) {
     <svg
       viewBox="0 0 48 48"
       className={cn("size-8", className)}
-      aria-hidden="true"
-    >
+      aria-hidden="true">
       <defs>
-        <linearGradient id="deswits-gold" x1="4" y1="40" x2="44" y2="6" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="deswits-gold"
+          x1="4"
+          y1="40"
+          x2="44"
+          y2="6"
+          gradientUnits="userSpaceOnUse">
           <stop offset="0" stopColor="var(--gold-dim)" />
           <stop offset="0.5" stopColor="var(--gold)" />
           <stop offset="1" stopColor="var(--gold-soft)" />
         </linearGradient>
       </defs>
-      <rect x="0.5" y="0.5" width="47" height="47" rx="12" fill="var(--ink)" stroke="var(--border)" />
+      <rect
+        x="0.5"
+        y="0.5"
+        width="47"
+        height="47"
+        rx="12"
+        fill="var(--ink)"
+        stroke="var(--border)"
+      />
       <path
         d="M9 33 L18 24 L24 29 L37 14"
         fill="none"
@@ -54,7 +68,7 @@ export function Logo({
 }) {
   const content = (
     <span className={cn("inline-flex items-center gap-2.5", className)}>
-      <LogoMark />
+      <Image src="/logo.png" alt="Deswits Logo" width={40} height={40} />
       <span className="flex flex-col leading-none">
         <span className="font-heading text-lg font-bold tracking-wide text-gradient-gold">
           DESWITS
@@ -71,7 +85,9 @@ export function Logo({
   if (href === null) return content;
 
   return (
-    <Link href={href} className="inline-flex items-center outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md">
+    <Link
+      href={href}
+      className="inline-flex items-center outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md">
       {content}
     </Link>
   );
