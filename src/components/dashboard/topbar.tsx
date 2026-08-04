@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { LogOut, Menu, Settings, User } from "lucide-react";
+import { LogOut, Menu, User, Wallet } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { Logo } from "@/components/site/logo";
-import { Badge } from "@/components/ui/badge";
 import { DASHBOARD_NAV } from "@/lib/dashboard-nav";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { cn } from "@/lib/utils";
@@ -28,7 +27,7 @@ export function DashboardTopbar() {
   const { data: user } = useCurrentUser();
 
   const currentLabel =
-    DASHBOARD_NAV.find((item) => item.href === pathname)?.label ?? "Overview";
+    DASHBOARD_NAV.find((item) => item.href === pathname)?.label ?? "Dashboard";
 
   const initials = user?.fullName
     ?.split(" ")
@@ -53,21 +52,14 @@ export function DashboardTopbar() {
               {DASHBOARD_NAV.map((item) => (
                 <Link
                   key={item.href}
-                  href={item.soon ? "#" : item.href}
+                  href={item.href}
                   className={cn(
-                    "flex items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground",
+                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground",
                     pathname === item.href && "border border-gold/30 bg-gold/10 text-gold"
                   )}
                 >
-                  <span className="flex items-center gap-3">
-                    <item.icon className="size-4" />
-                    {item.label}
-                  </span>
-                  {item.soon ? (
-                    <Badge variant="outline" className="text-[10px]">
-                      Soon
-                    </Badge>
-                  ) : null}
+                  <item.icon className="size-4" />
+                  {item.label}
                 </Link>
               ))}
             </nav>
@@ -99,13 +91,13 @@ export function DashboardTopbar() {
             </DropdownMenuLabel>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <DropdownMenuItem disabled>
+          <DropdownMenuItem render={<Link href="/dashboard/profile" />}>
             <User className="size-4" />
             Profile
           </DropdownMenuItem>
-          <DropdownMenuItem disabled>
-            <Settings className="size-4" />
-            Settings
+          <DropdownMenuItem render={<Link href="/dashboard/account" />}>
+            <Wallet className="size-4" />
+            Account
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem variant="destructive" onClick={() => signOut({ callbackUrl: "/" })}>

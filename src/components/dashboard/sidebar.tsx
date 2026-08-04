@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { Logo } from "@/components/site/logo";
-import { Badge } from "@/components/ui/badge";
 import { DASHBOARD_NAV } from "@/lib/dashboard-nav";
 import { cn } from "@/lib/utils";
 
@@ -22,26 +21,16 @@ export function DashboardSidebar() {
           return (
             <Link
               key={item.href}
-              href={item.soon ? "#" : item.href}
-              aria-disabled={item.soon}
+              href={item.href}
               className={cn(
-                "flex items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                 active
                   ? "border border-gold/30 bg-gold/10 text-gold"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                item.soon && "cursor-not-allowed opacity-60 hover:bg-transparent hover:text-muted-foreground"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )}
-              onClick={(e) => item.soon && e.preventDefault()}
             >
-              <span className="flex items-center gap-3">
-                <item.icon className="size-4" />
-                {item.label}
-              </span>
-              {item.soon ? (
-                <Badge variant="outline" className="border-border text-[10px] text-muted-foreground">
-                  Soon
-                </Badge>
-              ) : null}
+              <item.icon className="size-4" />
+              {item.label}
             </Link>
           );
         })}

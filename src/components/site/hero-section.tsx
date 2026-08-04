@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ArrowRight, Play, ShieldCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,13 @@ const STATS = [
 ];
 
 export function HeroSection() {
-  const [videoReady, setVideoReady] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [hasStarted, setHasStarted] = useState(false);
+
+  function handlePlayClick() {
+    videoRef.current?.play();
+    setHasStarted(true);
+  }
 
   return (
     <section id="home" className="relative isolate overflow-hidden bg-ink">
@@ -28,38 +34,44 @@ export function HeroSection() {
       </div>
 
       <div className="relative mx-auto flex max-w-7xl flex-col items-center px-4 pt-16 pb-20 text-center sm:px-6 sm:pt-20 sm:pb-28 lg:px-8">
-        {/* Video placeholder — the placeholder graphic stays underneath and
-            visible by default (load-failure events are unreliable here: they
-            fire on <source>, not <video>, and don't bubble). Drop a file at
-            public/videos/hero-bg.mp4 and it fades in on top automatically
-            once it actually has playable data. */}
+        {/* Paused by default — the placeholder + play button sit on top
+            until the visitor explicitly starts playback, then stay hidden
+            for the rest of the session (native controls take over from
+            there, pause included). */}
         <div className="relative aspect-video w-full max-w-4xl overflow-hidden rounded-2xl border border-gold/25 bg-ink glow-gold">
-          <NetworkBackground density={90} />
-          <div className="bg-radial-fade pointer-events-none absolute inset-0" />
-          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-3">
-            <span className="flex size-16 items-center justify-center rounded-full border border-gold/40 bg-gold/10 text-gold backdrop-blur-sm">
-              <Play className="size-6 fill-current" />
-            </span>
-            <p className="text-sm font-medium text-foreground">
-              Watch how Deswits works
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Product walkthrough coming soon
-            </p>
-          </div>
+          {!hasStarted ? (
+            <>
+              <NetworkBackground density={90} />
+              <div className="bg-radial-fade pointer-events-none absolute inset-0" />
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                <button
+                  type="button"
+                  onClick={handlePlayClick}
+                  aria-label="Play video"
+                  className="flex size-16 items-center justify-center rounded-full border border-gold/40 bg-gold/10 text-gold backdrop-blur-sm transition-colors hover:bg-gold/20"
+                >
+                  <Play className="size-6 fill-current" />
+                </button>
+                <p className="text-sm font-medium text-foreground">
+                  Watch how Deswits works
+                </p>
+                <p className="text-xs text-muted-foreground">Click to play</p>
+              </div>
+            </>
+          ) : null}
 
           <video
+            ref={videoRef}
             className={cn(
-              "absolute inset-0 h-full w-full object-cover transition-opacity duration-700",
-              videoReady ? "opacity-100" : "opacity-0"
+              "absolute inset-0 h-full w-full object-cover",
+              hasStarted ? "opacity-100" : "pointer-events-none opacity-0"
             )}
-            autoPlay
-            muted
-            loop
+            controls={hasStarted}
             playsInline
-            onLoadedData={() => setVideoReady(true)}
+            preload="metadata"
+            onPlay={() => setHasStarted(true)}
           >
-            <source src="/videos/hero-bg.mp4" type="video/mp4" />
+            <source src="/videos/landing.mp4" type="video/mp4" />
           </video>
         </div>
 

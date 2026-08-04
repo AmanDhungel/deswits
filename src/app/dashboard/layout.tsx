@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { DashboardTopbar } from "@/components/dashboard/topbar";
+import { IntroVideoGate } from "@/components/dashboard/intro-video-gate";
 
 export default async function DashboardLayout({
   children,
@@ -16,12 +17,14 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex min-h-screen bg-background">
-      <DashboardSidebar />
-      <div className="flex flex-1 flex-col">
-        <DashboardTopbar />
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
+    <IntroVideoGate>
+      <div className="flex min-h-screen bg-background">
+        <DashboardSidebar />
+        <div className="flex flex-1 flex-col">
+          <DashboardTopbar />
+          <main className="flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
+        </div>
       </div>
-    </div>
+    </IntroVideoGate>
   );
 }
