@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { auth } from "@/auth";
-import { findUserById } from "@/lib/db/users";
+import { findUserById, ensureYemchainAddress } from "@/lib/db/users";
 
 export async function GET() {
   const session = await auth();
@@ -16,14 +16,17 @@ export async function GET() {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
   }
 
+  const withWallet = await ensureYemchainAddress(user);
+
   return NextResponse.json({
-    id: user._id.toString(),
-    fullName: user.fullName,
-    email: user.email,
-    phone: user.phone ?? null,
-    image: user.image ?? null,
-    provider: user.provider,
-    plan: user.plan ?? "free",
-    createdAt: user.createdAt,
+    id: withWallet._id.toString(),
+    fullName: withWallet.fullName,
+    email: withWallet.email,
+    phone: withWallet.phone ?? null,
+    image: withWallet.image ?? null,
+    provider: withWallet.provider,
+    plan: withWallet.plan ?? "free",
+    yemchainAddress: withWallet.yemchainAddress ?? null,
+    createdAt: withWallet.createdAt,
   });
 }

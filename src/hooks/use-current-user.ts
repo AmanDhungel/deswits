@@ -10,6 +10,7 @@ export interface CurrentUser {
   image: string | null;
   provider: "email" | "google";
   plan: "free" | "premium";
+  yemchainAddress: string | null;
   createdAt: string;
 }
 

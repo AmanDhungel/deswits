@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
+import { deriveYemchainAddress } from "@/lib/yemchain";
 
 export type Plan = "free" | "premium";
 
@@ -11,6 +12,7 @@ export interface UserDocument {
   image?: string;
   provider: "email" | "google";
   plan: Plan;
+  yemchainAddress?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -18,9 +20,20 @@ export interface UserDocument {
 export type PublicUser = Omit<UserDocument, "_id"> & { id: string };
 
 export function toPublicUser(user: UserDocument): PublicUser {
-  const { _id, fullName, email, phone, image, provider, plan, createdAt, updatedAt } = user;
-  // Documents created before the plan field existed default to "free".
-  return { id: _id.toString(), fullName, email, phone, image, provider, plan: plan ?? "free", createdAt, updatedAt };
+  const { _id, fullName, email, phone, image, provider, plan, yemchainAddress, createdAt, updatedAt } = user;
+  // Documents created before the plan/yemchainAddress fields existed default gracefully.
+  return {
+    id: _id.toString(),
+    fullName,
+    email,
+    phone,
+    image,
+    provider,
+    plan: plan ?? "free",
+    yemchainAddress,
+    createdAt,
+    updatedAt,
+  };
 }
 
 async function usersCollection() {
@@ -63,18 +76,21 @@ export async function createEmailUser(input: {
 }) {
   await ensureIndexesOnce();
   const users = await usersCollection();
+  const _id = new ObjectId();
   const now = new Date();
-  const doc: Omit<UserDocument, "_id"> = {
+  const doc: UserDocument = {
+    _id,
     fullName: input.fullName,
     email: input.email.toLowerCase(),
     phone: input.phone,
     provider: "email",
     plan: "free",
+    yemchainAddress: deriveYemchainAddress(_id.toString()),
     createdAt: now,
     updatedAt: now,
   };
-  const result = await users.insertOne(doc as UserDocument);
-  return { ...doc, _id: result.insertedId } as UserDocument;
+  await users.insertOne(doc);
+  return doc;
 }
 
 export async function findOrCreateGoogleUser(input: {
@@ -87,18 +103,21 @@ export async function findOrCreateGoogleUser(input: {
   const existing = await users.findOne({ email: input.email.toLowerCase() });
   if (existing) return existing;
 
+  const _id = new ObjectId();
   const now = new Date();
-  const doc: Omit<UserDocument, "_id"> = {
+  const doc: UserDocument = {
+    _id,
     fullName: input.fullName,
     email: input.email.toLowerCase(),
     image: input.image,
     provider: "google",
     plan: "free",
+    yemchainAddress: deriveYemchainAddress(_id.toString()),
     createdAt: now,
     updatedAt: now,
   };
-  const result = await users.insertOne(doc as UserDocument);
-  return { ...doc, _id: result.insertedId } as UserDocument;
+  await users.insertOne(doc);
+  return doc;
 }
 
 export async function updateUserPlan(id: string, plan: Plan) {
@@ -106,6 +125,16 @@ export async function updateUserPlan(id: string, plan: Plan) {
   const users = await usersCollection();
   await users.updateOne({ _id: new ObjectId(id) }, { $set: { plan, updatedAt: new Date() } });
   return users.findOne({ _id: new ObjectId(id) });
+}
+
+/** Backfills a Yemchain address for accounts created before this field existed. */
+export async function ensureYemchainAddress(user: UserDocument): Promise<UserDocument> {
+  if (user.yemchainAddress) return user;
+
+  const address = deriveYemchainAddress(user._id.toString());
+  const users = await usersCollection();
+  await users.updateOne({ _id: user._id }, { $set: { yemchainAddress: address, updatedAt: new Date() } });
+  return { ...user, yemchainAddress: address };
 }
 
 export async function ensureUserIndexes() {
