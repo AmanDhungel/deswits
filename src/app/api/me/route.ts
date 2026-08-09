@@ -23,6 +23,7 @@ export async function GET() {
     phone: user.phone ?? null,
     image: user.image ?? null,
     provider: user.provider,
+    plan: user.plan ?? "free",
     createdAt: user.createdAt,
   });
 }

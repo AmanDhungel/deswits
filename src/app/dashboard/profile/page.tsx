@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { ProfileCard } from "@/components/dashboard/profile-card";
+import { MembershipCard } from "@/components/dashboard/membership-card";
 
 export const metadata: Metadata = {
   title: "Profile",
@@ -16,8 +17,9 @@ export default function ProfilePage() {
         </p>
       </div>
 
-      <div className="max-w-md">
+      <div className="grid gap-6 sm:grid-cols-2 max-w-3xl">
         <ProfileCard />
+        <MembershipCard />
       </div>
     </div>
   );

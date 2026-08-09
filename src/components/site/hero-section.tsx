@@ -11,8 +11,8 @@ import { cn } from "@/lib/utils";
 
 const STATS = [
   { value: "$42M+", label: "Deal flow secured" },
-  { value: "128", label: "Startups vetted" },
-  { value: "18K+", label: "Global investors" },
+  { value: "15+", label: "Startups vetted" },
+  { value: "1K+", label: "Global investors" },
   { value: "99.9%", label: "Ledger uptime" },
 ];
 
@@ -48,8 +48,7 @@ export function HeroSection() {
                   type="button"
                   onClick={handlePlayClick}
                   aria-label="Play video"
-                  className="flex size-16 items-center justify-center rounded-full border border-gold/40 bg-gold/10 text-gold backdrop-blur-sm transition-colors hover:bg-gold/20"
-                >
+                  className="flex size-16 items-center justify-center rounded-full border border-gold/40 bg-gold/10 text-gold backdrop-blur-sm transition-colors hover:bg-gold/20">
                   <Play className="size-6 fill-current" />
                 </button>
                 <p className="text-sm font-medium text-foreground">
@@ -64,13 +63,12 @@ export function HeroSection() {
             ref={videoRef}
             className={cn(
               "absolute inset-0 h-full w-full object-cover",
-              hasStarted ? "opacity-100" : "pointer-events-none opacity-0"
+              hasStarted ? "opacity-100" : "pointer-events-none opacity-0",
             )}
             controls={hasStarted}
             playsInline
             preload="metadata"
-            onPlay={() => setHasStarted(true)}
-          >
+            onPlay={() => setHasStarted(true)}>
             <source src="/videos/landing.mp4" type="video/mp4" />
           </video>
         </div>

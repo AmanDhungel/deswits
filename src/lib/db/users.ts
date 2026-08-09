@@ -1,6 +1,8 @@
 import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
 
+export type Plan = "free" | "premium";
+
 export interface UserDocument {
   _id: ObjectId;
   fullName: string;
@@ -8,6 +10,7 @@ export interface UserDocument {
   phone?: string;
   image?: string;
   provider: "email" | "google";
+  plan: Plan;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -15,8 +18,9 @@ export interface UserDocument {
 export type PublicUser = Omit<UserDocument, "_id"> & { id: string };
 
 export function toPublicUser(user: UserDocument): PublicUser {
-  const { _id, fullName, email, phone, image, provider, createdAt, updatedAt } = user;
-  return { id: _id.toString(), fullName, email, phone, image, provider, createdAt, updatedAt };
+  const { _id, fullName, email, phone, image, provider, plan, createdAt, updatedAt } = user;
+  // Documents created before the plan field existed default to "free".
+  return { id: _id.toString(), fullName, email, phone, image, provider, plan: plan ?? "free", createdAt, updatedAt };
 }
 
 async function usersCollection() {
@@ -65,6 +69,7 @@ export async function createEmailUser(input: {
     email: input.email.toLowerCase(),
     phone: input.phone,
     provider: "email",
+    plan: "free",
     createdAt: now,
     updatedAt: now,
   };
@@ -88,11 +93,19 @@ export async function findOrCreateGoogleUser(input: {
     email: input.email.toLowerCase(),
     image: input.image,
     provider: "google",
+    plan: "free",
     createdAt: now,
     updatedAt: now,
   };
   const result = await users.insertOne(doc as UserDocument);
   return { ...doc, _id: result.insertedId } as UserDocument;
+}
+
+export async function updateUserPlan(id: string, plan: Plan) {
+  if (!ObjectId.isValid(id)) return null;
+  const users = await usersCollection();
+  await users.updateOne({ _id: new ObjectId(id) }, { $set: { plan, updatedAt: new Date() } });
+  return users.findOne({ _id: new ObjectId(id) });
 }
 
 export async function ensureUserIndexes() {

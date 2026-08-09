@@ -9,6 +9,7 @@ export interface CurrentUser {
   phone: string | null;
   image: string | null;
   provider: "email" | "google";
+  plan: "free" | "premium";
   createdAt: string;
 }
 
