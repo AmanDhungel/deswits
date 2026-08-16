@@ -7,12 +7,15 @@ import crypto from "crypto";
  * endpoint docs available) — this is a real, persisted, per-user address
  * computed locally. Swap in actual Yemchain API calls here once real API
  * docs/base URL are available.
+ *
+ * Wallet generation is best-effort and must never block sign-in/sign-up:
+ * returns null if YEMCHAIN_KEY isn't configured in this environment,
+ * instead of throwing.
  */
-export function deriveYemchainAddress(userId: string): string {
+export function deriveYemchainAddress(userId: string): string | null {
   const secret = process.env.YEMCHAIN_KEY;
-  if (!secret) {
-    throw new Error("Missing YEMCHAIN_KEY environment variable.");
-  }
+  if (!secret) return null;
+
   const hash = crypto.createHmac("sha256", secret).update(userId).digest("hex");
   return `0x${hash.slice(0, 40)}`;
 }

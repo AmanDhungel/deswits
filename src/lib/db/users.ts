@@ -85,7 +85,7 @@ export async function createEmailUser(input: {
     phone: input.phone,
     provider: "email",
     plan: "free",
-    yemchainAddress: deriveYemchainAddress(_id.toString()),
+    yemchainAddress: deriveYemchainAddress(_id.toString()) ?? undefined,
     createdAt: now,
     updatedAt: now,
   };
@@ -112,7 +112,7 @@ export async function findOrCreateGoogleUser(input: {
     image: input.image,
     provider: "google",
     plan: "free",
-    yemchainAddress: deriveYemchainAddress(_id.toString()),
+    yemchainAddress: deriveYemchainAddress(_id.toString()) ?? undefined,
     createdAt: now,
     updatedAt: now,
   };
@@ -132,6 +132,8 @@ export async function ensureYemchainAddress(user: UserDocument): Promise<UserDoc
   if (user.yemchainAddress) return user;
 
   const address = deriveYemchainAddress(user._id.toString());
+  if (!address) return user; // YEMCHAIN_KEY not configured in this environment — skip silently
+
   const users = await usersCollection();
   await users.updateOne({ _id: user._id }, { $set: { yemchainAddress: address, updatedAt: new Date() } });
   return { ...user, yemchainAddress: address };
